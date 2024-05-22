@@ -14,7 +14,6 @@ export default function Articles(props) {
     if (!localStorage.getItem('token')) {
       navigate("/");
     } else {
-      console.log("here");
       getArticles();
     }
   }, []);

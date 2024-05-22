@@ -39,7 +39,7 @@ export default function ArticleForm(props) {
     const article = { title, text, topic };
 
     if (currentArticle) {
-      fetch(`${articlesUrl}/${currentArticle.article_id}`, {
+      fetch(articlesUrl/`${currentArticle.article_id}`, {
         method: "PUT",
         body: JSON.stringify(article),
         headers: {  

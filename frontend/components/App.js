@@ -117,7 +117,7 @@ export default function App() {
         .then(response => {
           // console.log(response.data.articles);
           setArticles(response.data.articles);
-          setMessage(response.message);
+          setMessage(response.data.message);
         })
         .catch(error => {
           setMessage("Failed to fetch articles");
@@ -128,47 +128,56 @@ export default function App() {
         .finally(() => setSpinnerOn(false));
   };
 
-  const postArticle = article => {
+  const postArticle = async (article) => {
     // ✨ implement
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
+    
     setMessage('')
     setSpinnerOn(true);
-    if (!localStorage.getItem("token")) {
-      redirectToLogin();
-      return;
-    }
+    try {
+      const response = await fetch(articlesUrl, { 
+        method: 'POST', 
+        headers: {
+          "Content-Type": 'application/json',
+          Authorization: localStorage.getItem("token")
+        }, 
+        body: JSON.stringify(article),
+      });
 
-    fetch(`${articlesUrl}`, { 
-      method: 'POST', 
-      headers: {
-        "Content-Type": 'application/json',
-        Authorization: localStorage.getItem("token")
-      }, 
-      body: JSON.stringify(article)
-    })
-    .then(response => {
-      if (!response.ok) throw new Error("Problem POSTing article");
-      return response.json();
-    })
-      .then(res => {
-        setArticles(articles => {return articles.concat(res.data.article)});
-        setMessage(res.message);
-      })
-      .catch(error => {
-        setMessage(error.message);
-        if (error.response && error.response.status === 401) {
-          redirectToLogin();
-        }
-      })
-      .finally(() => setSpinnerOn(false));
+      if (!response.ok) {
+        throw new Error(`An error has occurred: ${response.status}`);
+      }
+    // if (!localStorage.getItem("token")) {
+    //   redirectToLogin();
+    //   return;
+    // }
+    const newArticle = await response.json();
+    console.log('Article posted:', newArticle);
+    setSpinnerOn(false);
+    setMessage(response.message);
+  } catch (error) {
+      console.error("error posting article:", error);
+  }
+      // .then(res => {
+      //   console.log(res)
+      //   setArticles(res.article.concat(res.article));
+      //   setMessage(res.message);
+      // })
+      // .catch(error => {
+      //   setMessage(error.message);
+      //   if (error.response && error.response.status === 401) {
+      //     redirectToLogin();
+      //   }
+      // })
+      // .finally(() => setSpinnerOn(false));
   }
 
   const updateArticle = ({ article_id, article }) => {
     // ✨ implement
     // You got this!
-    fetch(`${articlesUrl}/${article_id}`, article), {
+    fetch(articlesUrl/`${article_id}`, article), {
       method: 'PUT',
       headers: {
         Authorization: localStorage.getItem("token")
@@ -198,7 +207,7 @@ export default function App() {
 
   const deleteArticle = article_id => {
     setSpinnerOn(true);
-    fetch(`${articlesUrl}/${article_id}`, {
+    fetch(`/api/articles/:${article_id}`, {
       method: 'DELETE',
       headers: {
         Authorization: localStorage.getItem("token"),
@@ -206,12 +215,13 @@ export default function App() {
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error("Failed to delete article.");
+        throw new Error("Failed to delete article.")
       }
-      return response.json();
+      // getArticles();
+      // // return response.json();
     })
     .then(res => {
-      const updatedArticles = articles.filter(item => item.id !== article_id);
+      const updatedArticles = res.articles.filter(item => item.id !== article_id);
       setArticles(updatedArticles);
       setMessage(res.data.message);
     })
