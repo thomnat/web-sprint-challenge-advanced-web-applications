@@ -77,15 +77,14 @@ export default function ArticleForm(props) {
   //  postArticle(article);
 };
 
-  const isDisabled = (values, initialFormValues ) => {
+  const isDisabled = (currentArticle) => {
     // ✨ implement
     // Make sure the inputs have some values
-     for (let key in initialFormValues) {
-      if (values[key] !== initialFormValues[key]) {
-        return false;
-      }
+     if (currentArticle === null || undefined) {
+      true;
+     } else {
+      false;
      }
-     return true;
   };
 
  
@@ -118,8 +117,8 @@ export default function ArticleForm(props) {
         <option value="Node">Node</option>
       </select>
       <div className="button-group">
-        <button disabled={isDisabled(values, initialFormValues)} id="submitArticle">Submit</button>
-        <button disabled={!currentArticle}>Cancel edit</button>
+        <button disabled={isDisabled(!initialFormValues)} id="submitArticle">Submit</button>
+        <button disabled={currentArticle}>Cancel edit</button>
       </div>
     </form>
   )

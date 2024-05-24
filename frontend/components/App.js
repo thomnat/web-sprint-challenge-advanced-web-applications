@@ -88,34 +88,9 @@ export default function App() {
     // Don't forget to turn off the spinner!
     setMessage('');
     setSpinnerOn(true);
-
-    // fetch(`${articlesUrl}`, {
-    //   headers: { 
-    //     Authorization: localStorage.getItem("token"), 
-    //   }
-    // })
-    //   .then(response => {
-    //     if (!response.ok) {
-    //       throw new Error("Problem GETing articles");
-    //   }
-    //   return response.json();
-    // })
-    //   .then(res => {
-    //     console.log(res.data);
-    //     setArticles(res.data);
-    //     setMessage(res.message);
-    //   })
-    //   .catch(error => {
-    //     setMessage("Failed to fetch articles");
-    //     if (error && error.status === 401) {
-    //       redirectToLogin();
-    //     }
-    //   })
-    //   .finally(() => setSpinnerOn(false));
       axios() 
         .get(articlesUrl)
         .then(response => {
-          // console.log(response.data.articles);
           setArticles(response.data.articles);
           setMessage(response.data.message);
         })
@@ -146,63 +121,70 @@ export default function App() {
         body: JSON.stringify(article),
       });
 
+      const newArticle = await response.json();
+
       if (!response.ok) {
         throw new Error(`An error has occurred: ${response.status}`);
       }
-    // if (!localStorage.getItem("token")) {
-    //   redirectToLogin();
-    //   return;
-    // }
-    const newArticle = await response.json();
+      if (!localStorage.getItem("token")) {
+        redirectToLogin();
+         return;
+    }
+    
     console.log('Article posted:', newArticle);
-    setSpinnerOn(false);
-    setMessage(response.message);
-    setArticles(response.article);
-    getArticles();
+    setArticles(prevArticles => [...prevArticles, newArticle.article]);
+    setMessage(newArticle.message)
+    // getArticles();
   } catch (error) {
       console.error("error posting article:", error);
-  }
-      // .then(res => {
-      //   console.log(res)
-      //   setArticles(res.article.concat(res.article));
-      //   setMessage(res.message);
-      // })
-      // .catch(error => {
-      //   setMessage(error.message);
-      //   if (error.response && error.response.status === 401) {
-      //     redirectToLogin();
-      //   }
-      // })
-      // .finally(() => setSpinnerOn(false));
-  }
+      setMessage(error.message || "Failed to post article.");
+  } finally {
+    setSpinnerOn(false);
+    } 
+  };
 
-  const updateArticle = ({ article_id, article }) => {
+  const updateArticle = async ({ article_id, article }) => {
     // ✨ implement
     // You got this!
-    fetch(`http://localhost:9000/api/articles/${article_id}`), {
+    setSpinnerOn(true);
+
+    try {
+      const response = await fetch(`http://localhost:9000/api/articles/${article_id}`, {
       method: 'PUT',
       headers: {
-        Authorization: localStorage.getItem("token")
+        Authorization: localStorage.getItem("token"),
+        "Content-Type": 'application/json'
       },
-      body: JSON.stringify({ article })
-      .then(response => {
-        if (!response.ok) throw new Error("Problem POSTing article");
-        return response.json();
-      })
-        .then(res => {
-          setArticles(articles => {return articles.concat(res.data.article)});
-          getArticles();
-          setMessage(res.data.message);
-        })
-        .catch(error => {
-          setMessage(error.data.message);
-          if (error.response && error.response.status === 401) {
-            redirectToLogin();
-          }
-        })
-        .finally(() => setSpinnerOn(false))
-    }
-  }
+      body: JSON.stringify(article)
+    });
+
+        if (!response.ok) {
+          throw new Error("Problem POSTing article");
+        }
+
+        const updatedArticle = await response.json();
+
+        if (!localStorage.getItem("token")) {
+          redirectToLogin();
+           return;
+      }
+      
+        
+          setArticles(prevArticles => 
+            prevArticles.map(art => art.article_id === article_id ? updatedArticle.article : art)
+          );
+
+          // getArticles();
+          setMessage(updatedArticle.message);
+        
+        } catch (error) {
+          console.error("error updating article:", error);
+          setMessage(error.message || "Failed to update article.");
+      } finally {
+        setSpinnerOn(false);
+        } 
+      };
+  
 
   const deleteArticle = async (article_id) => {
     setSpinnerOn(true);
@@ -223,9 +205,8 @@ export default function App() {
         throw new Error(data.error || 'Failed to delete article.');
       }
       
-      setArticles(prevArticles => prevArticles.filter(article => article.id !== article_id));
+      setArticles(prevArticles => prevArticles.filter(article => article.article_id !== article_id));
       setMessage(data.message);
-      getArticles();
     
     } catch (error) {
       setMessage(error.message || 'Failed to delete article.');
@@ -260,3 +241,4 @@ export default function App() {
     </>
   )
 }
+

@@ -4,7 +4,7 @@ import PT from 'prop-types'
 
 export default function Articles(props) {
   // ✨ where are my props? Destructure them here
-  const { setCurrentArticleId, articles, deleteArticle, getArticles } = props;
+  const { setCurrentArticleId, articles, deleteArticle, getArticles, currentArticleId } = props;
   const navigate = useNavigate();
 
   // ✨ implement conditional logic: if no token exists
@@ -18,10 +18,6 @@ export default function Articles(props) {
     }
   }, []);
     // ✨ grab the articles here, on first render only
-
-    const handleEdit = (currentArticleId) => {
-      setCurrentArticleId(currentArticleId)
-    };
   
 
   return (
@@ -42,7 +38,7 @@ export default function Articles(props) {
                 </div>
                 <div>
                   
-                    <button onClick={() => handleEdit(art.article_id)}>Edit</button>
+                    <button onClick={() => setCurrentArticleId(currentArticleId)}>Edit</button>
                   
                   <button onClick={() => deleteArticle(art.article_id)}>Delete</button>
                 </div>
