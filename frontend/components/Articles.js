@@ -18,6 +18,10 @@ export default function Articles(props) {
     }
   }, []);
     // ✨ grab the articles here, on first render only
+
+    const handleEdit = (currentArticleId) => {
+      setCurrentArticleId(currentArticleId)
+    };
   
 
   return (
@@ -37,7 +41,9 @@ export default function Articles(props) {
                   <p>Topic: {art.topic}</p>
                 </div>
                 <div>
-                  <button onClick={() => setCurrentArticleId(art.article_id)}>Edit</button>
+                  
+                    <button onClick={() => handleEdit(art.article_id)}>Edit</button>
+                  
                   <button onClick={() => deleteArticle(art.article_id)}>Delete</button>
                 </div>
               </div>

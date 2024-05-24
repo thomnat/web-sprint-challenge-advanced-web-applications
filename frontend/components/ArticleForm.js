@@ -2,24 +2,34 @@ import React, { useEffect, useState } from 'react'
 import PT from 'prop-types'
 
 const initialFormValues = { title: '', text: '', topic: '' }
-const articlesUrl = 'http://localhost:9000/api/articles'
+// const articlesUrl = 'http://localhost:9000/api/articles'
 
 
 export default function ArticleForm(props) {
   const [values, setValues] = useState(initialFormValues)
   // ✨ where are my props? Destructure them here
-  const { currentArticle, postArticle, updateArticle, setCurrentArticleId, logout } = props;
+  const { currentArticle, postArticle, updateArticle, setCurrentArticleId } = props;
 
   useEffect(() => {
     // ✨ implement
     // Every time the `currentArticle` prop changes, we should check it for truthiness:
     // if it's truthy, we should set its title, text and topic into the corresponding
     // values of the form. If it's not, we should reset the form back to initial values.
-    if (currentArticle) {
-      setValues(currentArticle)
-    } else {
-      setValues(initialFormValues)
-    }
+    // if (currentArticle.article_id) {
+    //   const currentArticle = articles.find(article => article.article_id === currentArticle.article_id);
+    //   if (currentArticle) {
+    //     setValues({
+    //       title: currentArticle.title,
+    //       text: currentArticle.text,
+    //       topic: currentArticle.topic
+    //     });
+    //   }
+    // } else {
+      if (currentArticle) {
+        setValues({ title: currentArticle.title, text: currentArticle.text, topic: currentArticle.topic })
+      } else {
+        setValues(initialFormValues);
+      }
   }, [currentArticle]);
 
   const onChange = evt => {
@@ -32,46 +42,55 @@ export default function ArticleForm(props) {
     // ✨ implement
     // We must submit a new post or update an existing one,
     // depending on the truthyness of the `currentArticle` prop.
-    
-
-    const { title, text, topic } = values;
-
-    const article = { title, text, topic };
 
     if (currentArticle) {
-      fetch(articlesUrl/`${currentArticle.article_id}`, {
-        method: "PUT",
-        body: JSON.stringify(article),
-        headers: {  
-          'Content-Type': 'application/json',
-          Authorization: localStorage.getItem("token"),
-         },
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Failed to update article.");
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Article updated successfully:', data);
-        updateArticle(data.article)
-        setCurrentArticleId(null);
-    })
-    .catch(error => {
-      console.error("Error updating article:", error);
-      if (error?.response?.status === 401) logout();
-    });
-  } else {
-   postArticle(article);
-  }
+      updateArticle(values);
+    } else {
+      postArticle(values);
+    }
+    setValues(initialFormValues);
+    setCurrentArticleId(null);
+  //     fetch(`http://localhost:9000/api/articles/${currentArticle.id}`, {
+  //       method: "PUT",
+  //       body: JSON.stringify(article),
+  //       headers: {  
+  //         'Content-Type': 'application/json',
+  //         Authorization: localStorage.getItem("token"),
+  //        },
+  //     })
+  //     .then(response => {
+  //       if (!response.ok) {
+  //         throw new Error("Failed to update article.");
+  //       }
+  //       return response.json();
+  //     })
+  //     .then(data => {
+  //       console.log('Article updated successfully:', data);
+  //       updateArticle(data.article)
+  //       setCurrentArticleId(null);
+  //   })
+  //   .catch(error => {
+  //     console.error("Error updating article:", error);
+  //     if (error?.response?.status === 401) logout();
+  //   });
+  // } else {
+  //  postArticle(article);
 };
 
-  const isDisabled = () => {
+  const isDisabled = (values, initialFormValues ) => {
     // ✨ implement
     // Make sure the inputs have some values
-    if (initialFormValues) isDisabled;
-  }
+     for (let key in initialFormValues) {
+      if (values[key] !== initialFormValues[key]) {
+        return false;
+      }
+     }
+     return true;
+  };
+
+ 
+ 
+    
 
   return (
     // ✨ fix the JSX: make the heading display either "Edit" or "Create"
@@ -99,8 +118,8 @@ export default function ArticleForm(props) {
         <option value="Node">Node</option>
       </select>
       <div className="button-group">
-        <button disabled={isDisabled()} id="submitArticle">Submit</button>
-        <button onClick={Function.prototype}>Cancel edit</button>
+        <button disabled={isDisabled(values, initialFormValues)} id="submitArticle">Submit</button>
+        <button disabled={!currentArticle}>Cancel edit</button>
       </div>
     </form>
   )

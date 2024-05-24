@@ -46,7 +46,7 @@ export default function App() {
     setMessage('');
     setSpinnerOn(true);
 
-    fetch(`${loginUrl}`, {
+    fetch(loginUrl, {
       method: 'POST',
       body: JSON.stringify({ 
         username: username, 
@@ -137,7 +137,7 @@ export default function App() {
     setMessage('')
     setSpinnerOn(true);
     try {
-      const response = await fetch(articlesUrl, { 
+      const response = await fetch('http://localhost:9000/api/articles', { 
         method: 'POST', 
         headers: {
           "Content-Type": 'application/json',
@@ -157,6 +157,8 @@ export default function App() {
     console.log('Article posted:', newArticle);
     setSpinnerOn(false);
     setMessage(response.message);
+    setArticles(response.article);
+    getArticles();
   } catch (error) {
       console.error("error posting article:", error);
   }
@@ -177,22 +179,19 @@ export default function App() {
   const updateArticle = ({ article_id, article }) => {
     // ✨ implement
     // You got this!
-    fetch(articlesUrl/`${article_id}`, article), {
+    fetch(`http://localhost:9000/api/articles/${article_id}`), {
       method: 'PUT',
       headers: {
         Authorization: localStorage.getItem("token")
       },
-      body: JSON.stringify({
-          title: '',
-          text: '',
-          topic: '',
-      })
+      body: JSON.stringify({ article })
       .then(response => {
         if (!response.ok) throw new Error("Problem POSTing article");
         return response.json();
       })
         .then(res => {
           setArticles(articles => {return articles.concat(res.data.article)});
+          getArticles();
           setMessage(res.data.message);
         })
         .catch(error => {
@@ -205,31 +204,35 @@ export default function App() {
     }
   }
 
-  const deleteArticle = article_id => {
+  const deleteArticle = async (article_id) => {
     setSpinnerOn(true);
-    fetch(`/api/articles/:${article_id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-    })
-    .then(response => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(`http://localhost:9000/api/articles/${article_id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: token,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to delete article.")
+        throw new Error(data.error || 'Failed to delete article.');
       }
-      // getArticles();
-      // // return response.json();
-    })
-    .then(res => {
-      const updatedArticles = res.articles.filter(item => item.id !== article_id);
-      setArticles(updatedArticles);
-      setMessage(res.data.message);
-    })
-    .catch(error => {
-      setMessage("Failed to delete article.", error);
-    })
-    .finally(() => setSpinnerOn(false));
-  };
+      
+      setArticles(prevArticles => prevArticles.filter(article => article.id !== article_id));
+      setMessage(data.message);
+      getArticles();
+    
+    } catch (error) {
+      setMessage(error.message || 'Failed to delete article.');
+    } finally {
+        setSpinnerOn(false);
+  }
+};
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
