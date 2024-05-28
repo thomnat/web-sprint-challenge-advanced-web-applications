@@ -43,38 +43,19 @@ export default function ArticleForm(props) {
     // We must submit a new post or update an existing one,
     // depending on the truthyness of the `currentArticle` prop.
 
+    // if (currentArticle.article_id) {
+    //   updateArticle({ article_id: setCurrentArticleId, article: values });
+    // } else {
+    //   postArticle(values);
+    // }
     if (currentArticle) {
-      updateArticle(values);
+      updateArticle({ article_id: currentArticle.article_id, article: values });
+      setCurrentArticleId(null);
     } else {
-      postArticle(values);
+      setValues(initialFormValues);
+      postArticle();
     }
-    setValues(initialFormValues);
-    setCurrentArticleId(null);
-  //     fetch(`http://localhost:9000/api/articles/${currentArticle.id}`, {
-  //       method: "PUT",
-  //       body: JSON.stringify(article),
-  //       headers: {  
-  //         'Content-Type': 'application/json',
-  //         Authorization: localStorage.getItem("token"),
-  //        },
-  //     })
-  //     .then(response => {
-  //       if (!response.ok) {
-  //         throw new Error("Failed to update article.");
-  //       }
-  //       return response.json();
-  //     })
-  //     .then(data => {
-  //       console.log('Article updated successfully:', data);
-  //       updateArticle(data.article)
-  //       setCurrentArticleId(null);
-  //   })
-  //   .catch(error => {
-  //     console.error("Error updating article:", error);
-  //     if (error?.response?.status === 401) logout();
-  //   });
-  // } else {
-  //  postArticle(article);
+  
 };
 
   const isDisabled = (currentArticle) => {
@@ -118,7 +99,7 @@ export default function ArticleForm(props) {
       </select>
       <div className="button-group">
         <button disabled={isDisabled(!initialFormValues)} id="submitArticle">Submit</button>
-        <button disabled={currentArticle}>Cancel edit</button>
+        <button disabled={!currentArticle}>Cancel edit</button>
       </div>
     </form>
   )

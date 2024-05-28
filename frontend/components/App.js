@@ -112,7 +112,7 @@ export default function App() {
     setMessage('')
     setSpinnerOn(true);
     try {
-      const response = await fetch('http://localhost:9000/api/articles', { 
+      const response = await fetch(articlesUrl, { 
         method: 'POST', 
         headers: {
           "Content-Type": 'application/json',
@@ -123,9 +123,9 @@ export default function App() {
 
       const newArticle = await response.json();
 
-      if (!response.ok) {
-        throw new Error(`An error has occurred: ${response.status}`);
-      }
+      // if (!response.ok) {
+      //   throw new Error(`An error has occurred: ${response.status}`);
+      // }
       if (!localStorage.getItem("token")) {
         redirectToLogin();
          return;
@@ -147,7 +147,7 @@ export default function App() {
     // ✨ implement
     // You got this!
     setSpinnerOn(true);
-
+    console.log("App.js here")
     try {
       const response = await fetch(`http://localhost:9000/api/articles/${article_id}`, {
       method: 'PUT',
@@ -169,19 +169,17 @@ export default function App() {
            return;
       }
       
-        
-          setArticles(prevArticles => 
+        setArticles(prevArticles => 
             prevArticles.map(art => art.article_id === article_id ? updatedArticle.article : art)
-          );
+        );
 
-          // getArticles();
-          setMessage(updatedArticle.message);
+        setMessage(updatedArticle.message);
         
         } catch (error) {
           console.error("error updating article:", error);
           setMessage(error.message || "Failed to update article.");
-      } finally {
-        setSpinnerOn(false);
+        } finally {
+          setSpinnerOn(false);
         } 
       };
   
@@ -231,7 +229,7 @@ export default function App() {
           <Route path="/" element={<LoginForm login={login} />} />
           <Route path="articles" element={
             <>
-              <ArticleForm currentArticleId={currentArticleId} postArticle={postArticle} updateArticle={updateArticle} setCurrentArticleId={setCurrentArticleId} logout={logout}/>
+              <ArticleForm currentArticle={articles.find((art) => art.article_id === currentArticleId)} postArticle={postArticle} updateArticle={updateArticle} setCurrentArticleId={setCurrentArticleId} logout={logout}/>
               <Articles setCurrentArticleId={setCurrentArticleId} currentArticleId={currentArticleId} articles={articles} deleteArticle={deleteArticle} updateArticle={updateArticle} getArticles={getArticles}/>
             </>
           } />
