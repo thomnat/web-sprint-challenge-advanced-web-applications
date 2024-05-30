@@ -25,6 +25,7 @@ export default function App() {
   // const token = localStorage.getItem('token')
   // console.log("Token:", token);
 
+  
   const logout = () => {
     // ✨ implement
     // If a token is in local storage it should be removed,
@@ -96,7 +97,7 @@ export default function App() {
         })
         .catch(error => {
           setMessage("Failed to fetch articles");
-          if (error && error.status === 401) {
+          if (error.status === 401) {
             redirectToLogin();
           }
         })
@@ -229,8 +230,8 @@ export default function App() {
           <Route path="/" element={<LoginForm login={login} />} />
           <Route path="articles" element={
             <>
-              <ArticleForm currentArticle={articles.find((art) => art.article_id === currentArticleId)} postArticle={postArticle} updateArticle={updateArticle} setCurrentArticleId={setCurrentArticleId} logout={logout}/>
-              <Articles setCurrentArticleId={setCurrentArticleId} currentArticleId={currentArticleId} articles={articles} deleteArticle={deleteArticle} updateArticle={updateArticle} getArticles={getArticles}/>
+              <ArticleForm currentArticle={articles.find((art) => art.article_id === currentArticleId) || null} postArticle={postArticle} updateArticle={updateArticle} setCurrentArticleId={setCurrentArticleId} logout={logout}/>
+              <Articles setCurrentArticleId={setCurrentArticleId} currentArticleId={currentArticleId} articles={articles} deleteArticle={deleteArticle} getArticles={getArticles}/>
             </>
           } />
         </Routes>

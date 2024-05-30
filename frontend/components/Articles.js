@@ -15,6 +15,10 @@ export default function Articles(props) {
       navigate("/");
     } else {
       getArticles();
+      
+      if ((currentArticleId === null) || (currentArticleId === undefined)) {
+        setCurrentArticleId(null);
+      }
     }
   }, []);
     // ✨ grab the articles here, on first render only
