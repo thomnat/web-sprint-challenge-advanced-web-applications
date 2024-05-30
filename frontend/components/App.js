@@ -50,12 +50,11 @@ export default function App() {
     fetch(loginUrl, {
       method: 'POST',
       body: JSON.stringify({ 
-        username: username, 
-        password: password
+        username,
+        password
        }),
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem("token")
       },
   })
   .then(response => {
@@ -65,7 +64,7 @@ export default function App() {
   .then(res => {
     if (res.token) {
       localStorage.setItem("token", res.token);
-      setMessage(res.message);
+      setMessage(res.message || 'Login successful!');
       redirectToArticles();
     } else {
       setMessage(res.message || "Login failed. Please try again.");
@@ -73,7 +72,7 @@ export default function App() {
   })
   .catch(error => {
     setMessage("Login failed. Please try again");
-    console.error("Login error:", error);
+    console.error("Login error:", error.message || error);
   })
   .finally(() => setSpinnerOn(false));
 };
